@@ -3,20 +3,17 @@ import { TypePieChart } from '@/components/TypePieChart'
 import { RarityDistribution } from '@/components/RarityDistribution'
 import { getTraits, getRarityScores } from '@/lib/rarity'
 import { getBurnedTokens } from '@/lib/data-loader'
-import { fetchCanvasStats } from '@/lib/normies-api'
-import { Flame, Users, Sparkles, Hash, Ghost } from 'lucide-react'
+import { Flame, Sparkles, Hash, Ghost } from 'lucide-react'
 
 export const revalidate = 60 // Revalidate every 60 seconds
 
 export default async function OverviewPage() {
   const traits = getTraits()
   const scores = getRarityScores()
-  const canvasStats = await fetchCanvasStats()
 
   const totalSupply = Object.keys(traits).length || 10000
   const burnedTokens = getBurnedTokens()
   const totalBurned = burnedTokens.length
-  const activeCanvasUsers = canvasStats?.activeUsers || 0
 
   // Count how many times each trait value appears across all Normies
   const traitValueCounts: Record<string, number> = {}
@@ -73,10 +70,9 @@ export default async function OverviewPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard title="Total Supply" value={totalSupply.toLocaleString()} icon={<Hash className="w-4 h-4" />} />
         <StatCard title="Total Burned" value={totalBurned.toLocaleString()} icon={<Flame className="w-4 h-4 text-orange-500" />} />
-        <StatCard title="Active Canvas Users" value={activeCanvasUsers.toLocaleString()} icon={<Users className="w-4 h-4" />} />
         <StatCard title="Rarest Combo" value={rarestCombo} subtitle={rank1Id ? `Normie #${rank1Id}` : undefined} icon={<Sparkles className="w-4 h-4 text-yellow-500" />} />
         <StatCard title="Most Common Type" value={mostCommonType} icon={<Ghost className="w-4 h-4" />} />
       </div>
