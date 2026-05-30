@@ -21,8 +21,7 @@ export default async function HolderPortfolioPage({ params }: { params: Promise<
     const rarity = scores[id]
     return {
       id,
-      rank: rarity ? rarity.rank : Infinity,
-      score: rarity ? rarity.score : 0
+      rank: rarity ? rarity.rank : Infinity
     }
   }).sort((a, b) => a.rank - b.rank)
 
@@ -48,8 +47,8 @@ export default async function HolderPortfolioPage({ params }: { params: Promise<
           icon={<Sparkles className="w-4 h-4 text-yellow-500" />} 
         />
         <StatCard 
-          title="Avg Rarity Score" 
-          value={ownedTokens.length > 0 ? (ownedTokens.reduce((sum, t) => sum + t.score, 0) / ownedTokens.length).toFixed(1) : '0'} 
+          title="Avg Rarity Rank" 
+          value={ownedTokens.length > 0 ? `#${Math.round(ownedTokens.filter(t => t.rank !== Infinity).reduce((sum, t) => sum + t.rank, 0) / (ownedTokens.filter(t => t.rank !== Infinity).length || 1)).toLocaleString()}` : 'N/A'} 
           icon={<Hash className="w-4 h-4 text-purple-500" />} 
         />
       </div>

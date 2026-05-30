@@ -1,69 +1,97 @@
 import fs from 'fs'
 import path from 'path'
 
-type TraitAttribute = { trait_type: string; value: string }
-type NormieEntry = { raw: string; attributes: TraitAttribute[] } | null
+const CONTRACT = '0x9eb6e2025b64f340691e424b7fe7022ffde12438'
+const CHAIN = 'ethereum'
+const TOTAL_SUPPLY = 10000
+const BATCH_SIZE = 50
+const RATE_LIMIT_MS = 550 // ~2 req/sec with margin
 
-function computeRarity() {
-  const dataDir = path.join(process.cwd(), 'public', 'data')
-  const traitsPath = path.join(dataDir, 'traits.json')
-  
-  if (!fs.existsSync(traitsPath)) {
-    console.error('traits.json not found. Run fetch-all-traits.ts first.')
+async function fetchRarityFromOpenSea() {
+  const key = process.env.OPENSEA_API_KEY
+  if (!key) {
+    console.error('OPENSEA_API_KEY not set in environment.')
     process.exit(1)
   }
 
-  const traitsData: Record<string, NormieEntry> = JSON.parse(fs.readFileSync(traitsPath, 'utf8'))
-  const totalSupply = Object.keys(traitsData).length
-  
-  // For each trait category, calculate frequency of each value
-  const traitFrequency: Record<string, Record<string, number>> = {}
+  const dataDir = path.join(process.cwd(), 'public', 'data')
+  const outPath = path.join(dataDir, 'rarity-scores.json')
 
-  for (const [, entry] of Object.entries(traitsData)) {
-    if (!entry) continue
-    for (const attr of entry.attributes) {
-      if (!traitFrequency[attr.trait_type]) traitFrequency[attr.trait_type] = {}
-      if (!traitFrequency[attr.trait_type][attr.value]) traitFrequency[attr.trait_type][attr.value] = 0
-      traitFrequency[attr.trait_type][attr.value]++
+  // Load existing scores to allow incremental updates
+  let scores: Record<number, { rank: number }> = {}
+  if (fs.existsSync(outPath)) {
+    try {
+      scores = JSON.parse(fs.readFileSync(outPath, 'utf8'))
+    } catch {
+      scores = {}
     }
   }
 
-  // Calculate inverse frequency score for each normie
-  const scores: { id: number; score: number }[] = []
+  // Find which IDs still need fetching
+  const allIds = Array.from({ length: TOTAL_SUPPLY }, (_, i) => i)
+  const missingIds = allIds.filter(id => !scores[id] || !scores[id].rank)
 
-  for (const [idStr, normieTraits] of Object.entries(traitsData)) {
-    if (!normieTraits) continue
-    let score = 0
-    for (const attr of normieTraits.attributes) {
-      const frequency = traitFrequency[attr.trait_type]?.[attr.value]
-      if (frequency) {
-        score += totalSupply / frequency
+  if (missingIds.length === 0) {
+    console.log('All 10,000 rarity scores already fetched. To re-fetch, delete rarity-scores.json.')
+    return
+  }
+
+  console.log(`Fetching rarity for ${missingIds.length} Normies from OpenSea...`)
+
+  let fetched = 0
+  let failed = 0
+
+  for (let i = 0; i < missingIds.length; i += BATCH_SIZE) {
+    const batch = missingIds.slice(i, i + BATCH_SIZE)
+
+    for (const id of batch) {
+      try {
+        const res = await fetch(
+          `https://api.opensea.io/api/v2/chain/${CHAIN}/contract/${CONTRACT}/nfts/${id}`,
+          { headers: { 'x-api-key': key, 'accept': 'application/json' } }
+        )
+
+        if (res.status === 429) {
+          // Rate limited — wait 10 seconds and retry
+          console.warn(`Rate limited at ID ${id}, waiting 10s...`)
+          await new Promise(r => setTimeout(r, 10000))
+          i -= BATCH_SIZE // Retry this batch
+          break
+        }
+
+        if (!res.ok) {
+          console.warn(`Failed to fetch ID ${id}: ${res.status}`)
+          failed++
+          await new Promise(r => setTimeout(r, RATE_LIMIT_MS))
+          continue
+        }
+
+        const data = await res.json()
+        const rank = data.nft?.rarity?.rank
+
+        if (rank) {
+          scores[id] = { rank }
+          fetched++
+        } else {
+          // NFT exists but has no rarity (e.g. burned)
+          failed++
+        }
+
+        await new Promise(r => setTimeout(r, RATE_LIMIT_MS))
+      } catch (err) {
+        console.error(`Error fetching ID ${id}:`, err)
+        failed++
+        await new Promise(r => setTimeout(r, RATE_LIMIT_MS))
       }
     }
-    scores.push({ id: parseInt(idStr), score })
+
+    // Save progress after each batch
+    fs.writeFileSync(outPath, JSON.stringify(scores, null, 2))
+    const total = fetched + failed
+    console.log(`Progress: ${total}/${missingIds.length} (${fetched} ok, ${failed} failed)`)
   }
 
-  // Find min and max for normalization
-  const minScore = Math.min(...scores.map(s => s.score))
-  const maxScore = Math.max(...scores.map(s => s.score))
-
-  // Sort descending by score
-  scores.sort((a, b) => b.score - a.score)
-
-  // Map to final output format: { [id]: { score (0-100), rank (1-10000) } }
-  const rarityScores: Record<number, { score: number; rank: number }> = {}
-
-  scores.forEach((item, index) => {
-    // Normalize to 0-100
-    const normalizedScore = ((item.score - minScore) / (maxScore - minScore)) * 100
-    rarityScores[item.id] = {
-      score: parseFloat(normalizedScore.toFixed(2)),
-      rank: index + 1
-    }
-  })
-
-  fs.writeFileSync(path.join(dataDir, 'rarity-scores.json'), JSON.stringify(rarityScores, null, 2))
-  console.log(`Computed rarity for ${scores.length} items.`)
+  console.log(`Done. Fetched ${fetched} rarity scores, ${failed} failed.`)
 }
 
-computeRarity()
+fetchRarityFromOpenSea()

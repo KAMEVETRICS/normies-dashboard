@@ -12,7 +12,6 @@ export type NormieTraits = {
 }
 
 export type RarityScore = {
-  score: number
   rank: number
 }
 

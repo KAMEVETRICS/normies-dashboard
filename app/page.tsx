@@ -41,16 +41,21 @@ export default async function OverviewPage() {
   const mostCommonType = typeData.length > 0 ? typeData[0].name : 'N/A'
 
   // Calculate rarity distribution bins
-  const bins = Array.from({ length: 10 }, (_, i) => ({
-    bin: `${i * 10}-${(i + 1) * 10}`,
-    min: i * 10,
-    max: (i + 1) * 10,
-    count: 0
-  }))
+  const rankBins = [
+    { bin: 'Top 100', min: 1, max: 100, count: 0 },
+    { bin: '101-500', min: 101, max: 500, count: 0 },
+    { bin: '501-1K', min: 501, max: 1000, count: 0 },
+    { bin: '1K-2K', min: 1001, max: 2000, count: 0 },
+    { bin: '2K-3K', min: 2001, max: 3000, count: 0 },
+    { bin: '3K-5K', min: 3001, max: 5000, count: 0 },
+    { bin: '5K-7K', min: 5001, max: 7000, count: 0 },
+    { bin: '7K-10K', min: 7001, max: 10000, count: 0 },
+  ]
 
   Object.values(scores).forEach(s => {
-    const binIndex = Math.min(Math.floor(s.score / 10), 9)
-    bins[binIndex].count++
+    const rank = s.rank
+    const bin = rankBins.find(b => rank >= b.min && rank <= b.max)
+    if (bin) bin.count++
   })
 
   // Compute rarest combo: find rank-1 Normie, then pick its two rarest traits
@@ -82,7 +87,7 @@ export default async function OverviewPage() {
           <TypePieChart data={typeData} />
         </div>
         <div className="lg:col-span-2">
-          <RarityDistribution data={bins} />
+          <RarityDistribution data={rankBins} />
         </div>
       </div>
     </div>

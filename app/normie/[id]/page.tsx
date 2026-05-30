@@ -98,7 +98,7 @@ export default async function NormieProfilePage({ params }: { params: Promise<{ 
               #{rarity ? rarity.rank.toLocaleString() : '---'}
             </div>
             <div className="text-sm text-[#e3e5e4]/70">
-              Score: <span className="text-white font-mono">{rarity ? rarity.score : 'N/A'}</span> / 100
+              Powered by <span className="text-white font-mono">OpenRarity</span>
             </div>
           </div>
 
