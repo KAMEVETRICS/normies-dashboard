@@ -2,21 +2,21 @@
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
-interface RarityDistributionProps {
-  data: { bin: string; count: number }[]
+interface TraitCountDistributionProps {
+  data: { label: string; count: number }[]
 }
 
-export function RarityDistribution({ data }: RarityDistributionProps) {
+export function TraitCountDistribution({ data }: TraitCountDistributionProps) {
   return (
     <div className="h-80 w-full bg-[#111111] border border-[#48494b]/40 rounded-xl p-4">
-      <h3 className="text-sm text-[#e3e5e4]/70 mb-4">Rarity Score Distribution</h3>
+      <h3 className="text-sm text-[#e3e5e4]/70 mb-4">Trait Count Distribution</h3>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}
           margin={{ top: 5, right: 20, left: -20, bottom: 5 }}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#48494b" vertical={false} />
-          <XAxis dataKey="bin" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+          <XAxis dataKey="label" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
           <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
           <Tooltip 
             cursor={{ fill: '#48494b', opacity: 0.2 }}

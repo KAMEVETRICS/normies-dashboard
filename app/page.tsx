@@ -1,6 +1,6 @@
 import { StatCard } from '@/components/StatCard'
 import { TypePieChart } from '@/components/TypePieChart'
-import { RarityDistribution } from '@/components/RarityDistribution'
+import { TraitCountDistribution } from '@/components/TraitCountDistribution'
 import { getTraits, getRarityScores } from '@/lib/rarity'
 import { getBurnedTokens } from '@/lib/data-loader'
 import { Flame, Sparkles, Hash, Ghost } from 'lucide-react'
@@ -19,6 +19,8 @@ export default async function OverviewPage() {
   const traitValueCounts: Record<string, number> = {}
   // Calculate Type distribution
   const typeCounts: Record<string, number> = { Human: 0, Cat: 0, Alien: 0, Agent: 0 }
+  // Calculate Trait Count distribution
+  const traitCounts: Record<number, number> = {}
 
   Object.values(traits).forEach(t => {
     if (!t) return
@@ -26,6 +28,10 @@ export default async function OverviewPage() {
     if (type && typeCounts[type] !== undefined) {
       typeCounts[type]++
     }
+    
+    const numTraits = t.attributes.length
+    traitCounts[numTraits] = (traitCounts[numTraits] || 0) + 1
+
     // Accumulate per-value counts for rarest combo computation
     t.attributes.forEach(attr => {
       const key = `${attr.trait_type}: ${attr.value}`
@@ -40,23 +46,10 @@ export default async function OverviewPage() {
 
   const mostCommonType = typeData.length > 0 ? typeData[0].name : 'N/A'
 
-  // Calculate rarity distribution bins
-  const rankBins = [
-    { bin: 'Top 100', min: 1, max: 100, count: 0 },
-    { bin: '101-500', min: 101, max: 500, count: 0 },
-    { bin: '501-1K', min: 501, max: 1000, count: 0 },
-    { bin: '1K-2K', min: 1001, max: 2000, count: 0 },
-    { bin: '2K-3K', min: 2001, max: 3000, count: 0 },
-    { bin: '3K-5K', min: 3001, max: 5000, count: 0 },
-    { bin: '5K-7K', min: 5001, max: 7000, count: 0 },
-    { bin: '7K-10K', min: 7001, max: 10000, count: 0 },
-  ]
-
-  Object.values(scores).forEach(s => {
-    const rank = s.rank
-    const bin = rankBins.find(b => rank >= b.min && rank <= b.max)
-    if (bin) bin.count++
-  })
+  // Format trait counts for the chart
+  const traitCountData = Object.entries(traitCounts)
+    .map(([count, total]) => ({ label: `${count} Traits`, count: total }))
+    .sort((a, b) => parseInt(a.label) - parseInt(b.label))
 
   // Compute rarest combo: find rank-1 Normie, then pick its two rarest traits
   let rarestCombo = 'N/A'
@@ -87,7 +80,7 @@ export default async function OverviewPage() {
           <TypePieChart data={typeData} />
         </div>
         <div className="lg:col-span-2">
-          <RarityDistribution data={rankBins} />
+          <TraitCountDistribution data={traitCountData} />
         </div>
       </div>
     </div>
