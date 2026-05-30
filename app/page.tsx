@@ -1,6 +1,5 @@
 import { StatCard } from '@/components/StatCard'
 import { TypePieChart } from '@/components/TypePieChart'
-import { TraitCountDistribution } from '@/components/TraitCountDistribution'
 import { getTraits, getRarityScores } from '@/lib/rarity'
 import { getBurnedTokens } from '@/lib/data-loader'
 import { Flame, Sparkles, Hash, Ghost } from 'lucide-react'
@@ -19,8 +18,6 @@ export default async function OverviewPage() {
   const traitValueCounts: Record<string, number> = {}
   // Calculate Type distribution
   const typeCounts: Record<string, number> = { Human: 0, Cat: 0, Alien: 0, Agent: 0 }
-  // Calculate Trait Count distribution
-  const traitCounts: Record<number, number> = {}
 
   Object.values(traits).forEach(t => {
     if (!t) return
@@ -29,9 +26,6 @@ export default async function OverviewPage() {
       typeCounts[type]++
     }
     
-    const numTraits = t.attributes.length
-    traitCounts[numTraits] = (traitCounts[numTraits] || 0) + 1
-
     // Accumulate per-value counts for rarest combo computation
     t.attributes.forEach(attr => {
       const key = `${attr.trait_type}: ${attr.value}`
@@ -45,11 +39,6 @@ export default async function OverviewPage() {
     .sort((a, b) => b.value - a.value)
 
   const mostCommonType = typeData.length > 0 ? typeData[0].name : 'N/A'
-
-  // Format trait counts for the chart
-  const traitCountData = Object.entries(traitCounts)
-    .map(([count, total]) => ({ label: `${count} Traits`, count: total }))
-    .sort((a, b) => parseInt(a.label) - parseInt(b.label))
 
   // Compute rarest combo: find rank-1 Normie, then pick its two rarest traits
   let rarestCombo = 'N/A'
@@ -75,13 +64,8 @@ export default async function OverviewPage() {
         <StatCard title="Most Common Type" value={mostCommonType} icon={<Ghost className="w-4 h-4" />} />
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
-          <TypePieChart data={typeData} />
-        </div>
-        <div className="lg:col-span-2">
-          <TraitCountDistribution data={traitCountData} />
-        </div>
+      <div className="max-w-2xl mx-auto">
+        <TypePieChart data={typeData} />
       </div>
     </div>
   )
