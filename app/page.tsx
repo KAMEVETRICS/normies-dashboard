@@ -57,15 +57,16 @@ export default async function OverviewPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Total Supply" value={totalSupply.toLocaleString()} icon={<Hash className="w-4 h-4" />} />
-        <StatCard title="Total Burned" value={totalBurned.toLocaleString()} icon={<Flame className="w-4 h-4 text-orange-500" />} />
-        <StatCard title="Rarest Combo" value={rarestCombo} subtitle={rank1Id ? `Normie #${rank1Id}` : undefined} icon={<Sparkles className="w-4 h-4 text-yellow-500" />} />
-        <StatCard title="Most Common Type" value={mostCommonType} icon={<Ghost className="w-4 h-4" />} />
-      </div>
-      
-      <div className="max-w-2xl mx-auto">
-        <TypePieChart data={typeData} />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <StatCard title="Total Supply" value={totalSupply.toLocaleString()} icon={<Hash className="w-4 h-4" />} />
+          <StatCard title="Total Burned" value={totalBurned.toLocaleString()} icon={<Flame className="w-4 h-4 text-orange-500" />} />
+          <StatCard title="Rarest Combo" value={rarestCombo} subtitle={rank1Id ? `Normie #${rank1Id}` : undefined} icon={<Sparkles className="w-4 h-4 text-yellow-500" />} />
+          <StatCard title="Most Common Type" value={mostCommonType} icon={<Ghost className="w-4 h-4" />} />
+        </div>
+        <div className="lg:col-span-1">
+          <TypePieChart data={typeData} />
+        </div>
       </div>
     </div>
   )
