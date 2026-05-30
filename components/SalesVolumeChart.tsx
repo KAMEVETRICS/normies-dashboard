@@ -11,6 +11,7 @@ export function SalesVolumeChart({ data }: SalesVolumeChartProps) {
   // Reverse the data so it reads left-to-right chronologically
   const chartData = [...data].reverse().map(d => ({
     ...d,
+    volume_usd: Number(d.volume_usd || 0),
     dateStr: new Date(d.sale_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
   }))
 
@@ -25,7 +26,7 @@ export function SalesVolumeChart({ data }: SalesVolumeChartProps) {
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#48494b" vertical={false} />
             <XAxis dataKey="dateStr" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} minTickGap={30} />
-            <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value >= 1000 ? (value / 1000).toFixed(1) + 'k' : value}`} />
+            <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} type="number" domain={[0, 'auto']} tickFormatter={(value: number) => `$${value >= 1000 ? (value / 1000).toFixed(0) + 'k' : value}`} />
             <Tooltip 
               cursor={{ fill: '#48494b', opacity: 0.2 }}
               contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #48494b', borderRadius: '8px', color: '#e3e5e4' }}

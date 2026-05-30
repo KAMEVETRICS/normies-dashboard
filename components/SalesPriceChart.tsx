@@ -11,6 +11,8 @@ export function SalesPriceChart({ data }: SalesPriceChartProps) {
   // Reverse the data so it reads left-to-right chronologically
   const chartData = [...data].reverse().map(d => ({
     ...d,
+    floor_usd: Number(d.floor_usd || 0),
+    avg_usd: Number(d.avg_usd || 0),
     dateStr: new Date(d.sale_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
   }))
 
