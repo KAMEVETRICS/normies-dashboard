@@ -77,3 +77,23 @@ export async function fetchHolderTokens(address: string) {
     return []
   }
 }
+
+export async function fetchLiveOpenSeaRarity(id: number) {
+  try {
+    const apiKey = process.env.OPENSEA_API_KEY
+    if (!apiKey) return null
+    const res = await fetch(`https://api.opensea.io/api/v2/chain/ethereum/contract/0x9eb6e2025b64f340691e424b7fe7022ffde12438/nfts/${id}`, {
+      headers: {
+        'x-api-key': apiKey,
+        'accept': 'application/json'
+      },
+      next: { revalidate: 60 } // Cache for 60 seconds so rapid refreshes don't spam the API
+    })
+    if (!res.ok) return null
+    const data = await res.json()
+    return data.nft?.rarity?.rank || null
+  } catch (error) {
+    console.error(`Error fetching live rarity for ${id}:`, error)
+    return null
+  }
+}

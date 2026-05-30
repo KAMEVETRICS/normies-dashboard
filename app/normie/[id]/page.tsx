@@ -1,5 +1,5 @@
 import { getTraits, getRarityScores } from '@/lib/rarity'
-import { fetchNormieMetadata, fetchNormieVersions, fetchNormiePixels } from '@/lib/normies-api'
+import { fetchNormieMetadata, fetchNormieVersions, fetchNormiePixels, fetchLiveOpenSeaRarity } from '@/lib/normies-api'
 import { NormieImageViewer } from '@/components/NormieImageViewer'
 import { getBurnedTokens } from '@/lib/data-loader'
 import { Flame } from 'lucide-react'
@@ -48,7 +48,10 @@ export default async function NormieProfilePage({ params }: { params: Promise<{ 
   const scores = getRarityScores()
   const traitsData = getTraits()
   
-  const rarity = scores[tokenId]
+  const cachedRarity = scores[tokenId]
+  const liveRank = await fetchLiveOpenSeaRarity(tokenId)
+  const displayRank = liveRank ?? cachedRarity?.rank
+  
   const normieTraits = traitsData[tokenId]
   const attributes = normieTraits?.attributes ?? []
   const metadata = await fetchNormieMetadata(tokenId)
@@ -95,10 +98,11 @@ export default async function NormieProfilePage({ params }: { params: Promise<{ 
           <div className="bg-[#111111] border border-[#48494b]/40 rounded-xl p-6 text-center shadow-lg shadow-black/50">
             <h2 className="text-xs uppercase tracking-[0.2em] text-[#e3e5e4]/50 mb-2">Collection Rank</h2>
             <div className="text-6xl font-black text-white tracking-tighter mb-2">
-              #{rarity ? rarity.rank.toLocaleString() : '---'}
+              #{displayRank ? displayRank.toLocaleString() : '---'}
             </div>
             <div className="text-sm text-[#e3e5e4]/70">
               Powered by <span className="text-white font-mono">OpenRarity</span>
+              {liveRank && <span className="ml-2 text-[10px] text-green-400/80 border border-green-400/30 px-1.5 py-0.5 rounded-full">LIVE</span>}
             </div>
           </div>
 
