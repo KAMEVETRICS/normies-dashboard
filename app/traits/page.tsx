@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
+import Link from 'next/link'
 import {
   BarChart,
   Bar,
@@ -31,6 +32,7 @@ export default function TraitsExplorerPage() {
   const [traits, setTraits] = useState<TraitsData | null>(null)
   const [activeCategory, setActiveCategory] = useState<string>('Type')
   const [filters, setFilters] = useState<Record<string, string>>({})
+  const [showAll, setShowAll] = useState(false)
 
   useEffect(() => {
     fetch('/data/traits.json')
@@ -70,23 +72,32 @@ export default function TraitsExplorerPage() {
       .sort((a, b) => a.count - b.count)
   }, [traits, activeCategory])
 
-  // Intersection filter: count normies matching ALL selected filters
-  const matchCount = useMemo(() => {
-    if (!traits) return 0
+  // Intersection filter: collect normie IDs matching ALL selected filters
+  const matchedIds = useMemo(() => {
+    if (!traits) return []
     const activeFilters = Object.entries(filters).filter(([, v]) => v !== '')
-    if (activeFilters.length === 0) return Object.keys(traits).length
-    let count = 0
-    for (const entry of Object.values(traits)) {
+    if (activeFilters.length === 0) return []
+    const ids: number[] = []
+    for (const [id, entry] of Object.entries(traits)) {
       if (!entry) continue;
       const matches = activeFilters.every(([cat, val]) =>
         entry.attributes.some((a) => a.trait_type === cat && a.value === val)
       )
-      if (matches) count++
+      if (matches) ids.push(Number(id))
     }
-    return count
+    return ids.sort((a, b) => a - b)
   }, [traits, filters])
 
+  const hasActiveFilters = Object.values(filters).some((v) => v !== '')
+  const matchCount = hasActiveFilters ? matchedIds.length : (traits ? Object.keys(traits).length : 0)
   const totalCount = traits ? Object.keys(traits).length : 0
+  const DISPLAY_LIMIT = 100
+  const displayedIds = showAll ? matchedIds : matchedIds.slice(0, DISPLAY_LIMIT)
+
+  // Reset showAll when filters change
+  useEffect(() => {
+    setShowAll(false)
+  }, [filters])
 
   if (!traits) {
     return (
@@ -227,8 +238,48 @@ export default function TraitsExplorerPage() {
               </button>
             </div>
           </div>
+
+          {/* Matching Normie IDs grid */}
+          {hasActiveFilters && matchedIds.length > 0 && (
+            <div className="bg-[#111111] border border-[#48494b]/40 rounded-xl p-6">
+              <h3 className="font-medium text-white mb-1">Matching Normies</h3>
+              <p className="text-sm text-[#e3e5e4]/50 mb-5">
+                {matchedIds.length > DISPLAY_LIMIT && !showAll
+                  ? `Showing ${DISPLAY_LIMIT} of ${matchedIds.length.toLocaleString()} results`
+                  : `${matchedIds.length.toLocaleString()} result${matchedIds.length !== 1 ? 's' : ''}`}
+              </p>
+              <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
+                {displayedIds.map((id) => (
+                  <Link
+                    key={id}
+                    href={`/normie/${id}`}
+                    className="group flex flex-col items-center gap-1 p-2 rounded-lg border border-[#48494b]/20 hover:border-[#e3e5e4]/40 hover:bg-[#1a1a1a] transition-all"
+                  >
+                    <img
+                      src={`https://api.normies.art/normie/${id}/image.svg`}
+                      alt={`Normie #${id}`}
+                      className="w-full aspect-square rounded-md rendering-pixelated"
+                      loading="lazy"
+                    />
+                    <span className="text-xs text-[#e3e5e4]/70 group-hover:text-white transition-colors font-mono">
+                      #{id}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+              {matchedIds.length > DISPLAY_LIMIT && (
+                <button
+                  onClick={() => setShowAll(!showAll)}
+                  className="mt-4 w-full text-sm text-[#e3e5e4]/50 hover:text-[#e3e5e4] transition-colors px-3 py-2 border border-[#48494b]/40 rounded-lg"
+                >
+                  {showAll ? 'Show less' : `Show all ${matchedIds.length.toLocaleString()} results`}
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
   )
 }
+
