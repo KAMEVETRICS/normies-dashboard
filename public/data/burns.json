@@ -13787,23 +13787,6 @@
     "revealTxHash": "0x6c1235a4cbb179b545513208d8c9b4611356b849c9cdc4cde6ba3a4a2322329f"
   },
   {
-    "commitId": "6",
-    "owner": "0x20134c1447fda725e61891d22428e826f946502f",
-    "receiverTokenId": "9197",
-    "tokenCount": 2,
-    "transferredActionPoints": "0",
-    "pixelCounts": "[624,639]",
-    "blockNumber": "24535996",
-    "timestamp": "1772047451",
-    "txHash": "0x63642d5a13b0aa4ab042690c96828275fc8fe8f7d78214a0c5f23755c244fb1e",
-    "revealed": true,
-    "totalActions": "36",
-    "expired": false,
-    "revealBlockNumber": "24536004",
-    "revealTimestamp": "1772047547",
-    "revealTxHash": "0x598f0e4070b560f4e434c629557c20cc416b707c7306456bd937c69888cc137c"
-  },
-  {
     "commitId": "5",
     "owner": "0x2f36812c11c9d58981db5ef84b23967576930932",
     "receiverTokenId": "7491",
@@ -13819,6 +13802,23 @@
     "revealBlockNumber": "24536004",
     "revealTimestamp": "1772047547",
     "revealTxHash": "0xf19dd0f3d98ec481b7fde29ad07defe614eff75f76c235a4145ddfbcd7fda9d3"
+  },
+  {
+    "commitId": "6",
+    "owner": "0x20134c1447fda725e61891d22428e826f946502f",
+    "receiverTokenId": "9197",
+    "tokenCount": 2,
+    "transferredActionPoints": "0",
+    "pixelCounts": "[624,639]",
+    "blockNumber": "24535996",
+    "timestamp": "1772047451",
+    "txHash": "0x63642d5a13b0aa4ab042690c96828275fc8fe8f7d78214a0c5f23755c244fb1e",
+    "revealed": true,
+    "totalActions": "36",
+    "expired": false,
+    "revealBlockNumber": "24536004",
+    "revealTimestamp": "1772047547",
+    "revealTxHash": "0x598f0e4070b560f4e434c629557c20cc416b707c7306456bd937c69888cc137c"
   },
   {
     "commitId": "4",
