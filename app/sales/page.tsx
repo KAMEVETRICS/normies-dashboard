@@ -68,26 +68,21 @@ export default async function SalesPage() {
   const osMarketCap = osStats?.total?.market_cap ? Math.round(osStats.total.market_cap) : (currentFloor * (10000 - totalBurned))
   const uniqueHolders = osStats?.total?.num_owners || (holdersData.length > 0 ? holdersData[0].unique_holders : 'N/A')
 
+  const osOneDaySales = osStats?.intervals?.find((i: any) => i.interval === 'one_day')?.sales
+  const last24hSales = osOneDaySales !== undefined ? osOneDaySales : (daily[0]?.num_sales || 0)
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <h1 className="text-3xl font-bold tracking-widest text-white">SALES DASHBOARD</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <div className="bg-[#111111] border border-[#48494b]/40 rounded-xl p-5 flex flex-col gap-2">
-          <div className="text-sm text-[#e3e5e4]/70">Market Cap (USD)</div>
-          <div className="text-3xl font-bold text-white">${osMarketCap.toLocaleString()}</div>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-[#111111] border border-[#48494b]/40 rounded-xl p-5 flex flex-col gap-2">
           <div className="text-sm text-[#e3e5e4]/70">Total Volume</div>
           <div className="text-3xl font-bold text-white">${Math.round(totalVolume).toLocaleString()}</div>
         </div>
         <div className="bg-[#111111] border border-[#48494b]/40 rounded-xl p-5 flex flex-col gap-2">
-          <div className="text-sm text-[#e3e5e4]/70">Unique Holders</div>
-          <div className="text-3xl font-bold text-white">{uniqueHolders}</div>
-        </div>
-        <div className="bg-[#111111] border border-[#48494b]/40 rounded-xl p-5 flex flex-col gap-2">
           <div className="text-sm text-[#e3e5e4]/70">Last 24h Sales</div>
-          <div className="text-3xl font-bold text-white">{daily[0]?.num_sales || 0}</div>
+          <div className="text-3xl font-bold text-white">{last24hSales}</div>
         </div>
         <div className="bg-[#111111] border border-[#48494b]/40 rounded-xl p-5 flex flex-col gap-2">
           <div className="text-sm text-[#e3e5e4]/70">Active Markets</div>

@@ -39,7 +39,7 @@ export function MarketCapChart({ data }: MarketCapChartProps) {
     <div className="h-[28rem] w-full bg-[#111111] border border-[#48494b]/40 rounded-xl p-6">
       <h3 className="font-medium text-white mb-6">Market Cap, Daily Burns & Unique Holders</h3>
       <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+        <ComposedChart data={data} margin={{ top: 10, right: 10, left: 20, bottom: 20 }}>
           <defs>
             <linearGradient id="colorMarketCap" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3}/>
@@ -63,7 +63,11 @@ export function MarketCapChart({ data }: MarketCapChartProps) {
             stroke="#e3e5e4"
             opacity={0.5}
             tick={{ fill: '#e3e5e4', fontSize: 12 }}
-            tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+            tickFormatter={(value) => {
+              if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`
+              if (value >= 1000) return `$${(value / 1000).toFixed(0)}k`
+              return `$${value}`
+            }}
           />
           <YAxis 
             yAxisId="right"
