@@ -28,9 +28,28 @@ export default async function SalesPage() {
     holdersMap.set(dString, h.unique_holders)
   }
 
-  let lastValidFloor = 0
+  // Forward-fill floor_usd and avg_usd for charts to prevent drops to zero
+  // daily is sorted newest to oldest. We iterate oldest to newest to forward-fill
+  let lastFloor = 0
+  let lastAvg = 0
+  const processedDaily = daily.slice().reverse().map(d => {
+    const floor = Number(d.floor_usd) || 0
+    const avg = Number(d.avg_usd) || 0
+    
+    if (floor > 0) lastFloor = floor
+    const finalFloor = floor > 0 ? floor : lastFloor
+    
+    if (avg > 0) lastAvg = avg
+    const finalAvg = avg > 0 ? avg : lastAvg
+    
+    return {
+      ...d,
+      floor_usd: finalFloor,
+      avg_usd: finalAvg
+    }
+  }).reverse() // back to newest-first
 
-  const marketCapData = daily.slice().reverse().map((day: DailySale) => {
+  const marketCapData = processedDaily.slice().reverse().map((day: DailySale) => {
     const dateObj = new Date(day.sale_date)
     const nextDateObj = new Date(dateObj)
     nextDateObj.setDate(nextDateObj.getDate() + 1)
@@ -50,15 +69,7 @@ export default async function SalesPage() {
     }
     
     const supply = 10000 - burnsUpToDate
-    
-    // Forward-fill floor price for days with 0 sales
-    let currentFloor = Number(day.floor_usd) || 0
-    if (currentFloor > 0) {
-      lastValidFloor = currentFloor
-    } else {
-      currentFloor = lastValidFloor
-    }
-    
+    const currentFloor = day.floor_usd
     const marketCap = currentFloor * supply
     
     const dString = dateObj.toISOString().split('T')[0]
@@ -103,10 +114,10 @@ export default async function SalesPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-[#111111] border border-[#48494b]/40 rounded-xl p-6 h-80">
-          <SalesPriceChart data={daily} />
+          <SalesPriceChart data={processedDaily} />
         </div>
         <div className="bg-[#111111] border border-[#48494b]/40 rounded-xl p-6 h-80">
-          <SalesVolumeChart data={daily} />
+          <SalesVolumeChart data={processedDaily} />
         </div>
       </div>
 
