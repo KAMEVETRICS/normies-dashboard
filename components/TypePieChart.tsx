@@ -6,7 +6,7 @@ interface TypePieChartProps {
   data: { name: string; value: number }[]
 }
 
-const COLORS = ['#e3e5e4', '#a0a0a0', '#707070', '#48494b']
+const COLORS = ['#e3e5e4', '#a0a0a0', '#707070', '#48494b', '#2d2d2d']
 
 export function TypePieChart({ data }: TypePieChartProps) {
   return (
@@ -17,7 +17,7 @@ export function TypePieChart({ data }: TypePieChartProps) {
           <Pie
             data={data}
             cx="50%"
-            cy="50%"
+            cy="45%"
             innerRadius={60}
             outerRadius={80}
             paddingAngle={5}
@@ -32,7 +32,7 @@ export function TypePieChart({ data }: TypePieChartProps) {
             contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #48494b', borderRadius: '8px' }}
             itemStyle={{ color: '#e3e5e4' }}
           />
-          <Legend verticalAlign="bottom" height={36} />
+          <Legend verticalAlign="bottom" wrapperStyle={{ paddingTop: '20px' }} />
         </PieChart>
       </ResponsiveContainer>
     </div>

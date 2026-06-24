@@ -47,8 +47,21 @@ export default async function OverviewPage() {
     .sort((a, b) => b.value - a.value)
 
   const mostCommonType = typeData.length > 0 ? typeData[0].name : 'N/A'
-  const rarestType = typeData.length > 0 ? typeData[typeData.length - 1].name : 'N/A'
-  const rarestTypeCount = typeData.length > 0 ? typeData[typeData.length - 1].value : 0
+
+  // Compute rarest combo: find rank-1 Normie, then pick its two rarest traits
+  let rarestCombo = 'N/A'
+  const rank1Id = Object.entries(scores).find(([, s]) => s.rank === 1)?.[0]
+  if (rank1Id) {
+    const rank1Traits = traits[Number(rank1Id)]
+    if (rank1Traits) {
+      // Sort this Normie's traits by global frequency (ascending = rarest first)
+      const sorted = [...rank1Traits.attributes]
+        .map(attr => ({ label: attr.value, count: traitValueCounts[`${attr.trait_type}: ${attr.value}`] || 0 }))
+        .sort((a, b) => a.count - b.count)
+      const top2 = sorted.slice(0, 2).map(t => t.label)
+      rarestCombo = top2.join(' + ')
+    }
+  }
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -56,7 +69,8 @@ export default async function OverviewPage() {
         <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
           <StatCard title="Total Supply" value={totalSupply.toLocaleString()} icon={<Hash className="w-4 h-4" />} />
           <StatCard title="Total Burned" value={totalBurned.toLocaleString()} icon={<Flame className="w-4 h-4 text-orange-500" />} />
-          <StatCard title="Rarest Type" value={rarestType} subtitle={`${rarestTypeCount} found`} icon={<Sparkles className="w-4 h-4 text-yellow-500" />} />
+          <StatCard title="Total Zombies" value={totalZombies.toLocaleString()} icon={<Skull className="w-4 h-4 text-green-500" />} />
+          <StatCard title="Rarest Combo" value={rarestCombo} subtitle={rank1Id ? `Normie #${rank1Id}` : undefined} icon={<Sparkles className="w-4 h-4 text-yellow-500" />} />
           <StatCard title="Most Common Type" value={mostCommonType} icon={<Ghost className="w-4 h-4" />} />
         </div>
         <div className="lg:col-span-1">
