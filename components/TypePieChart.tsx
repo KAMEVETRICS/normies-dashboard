@@ -16,8 +16,8 @@ export function TypePieChart({ data }: TypePieChartProps) {
         <PieChart>
           <Pie
             data={data}
-            cx="50%"
-            cy="45%"
+            cx="40%"
+            cy="50%"
             innerRadius={60}
             outerRadius={80}
             paddingAngle={5}
@@ -32,7 +32,7 @@ export function TypePieChart({ data }: TypePieChartProps) {
             contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #48494b', borderRadius: '8px' }}
             itemStyle={{ color: '#e3e5e4' }}
           />
-          <Legend verticalAlign="bottom" wrapperStyle={{ paddingTop: '20px' }} />
+          <Legend layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ paddingLeft: '20px' }} />
         </PieChart>
       </ResponsiveContainer>
     </div>
