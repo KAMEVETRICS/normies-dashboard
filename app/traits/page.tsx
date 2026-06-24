@@ -35,9 +35,23 @@ export default function TraitsExplorerPage() {
   const [showAll, setShowAll] = useState(false)
 
   useEffect(() => {
-    fetch('/data/traits.json')
-      .then((r) => r.json())
-      .then((data: TraitsData) => setTraits(data))
+    Promise.all([
+      fetch('/data/traits.json').then((r) => r.json()),
+      fetch('https://api.normies.art/zombies/conversions?limit=100').then((r) => r.ok ? r.json() : [])
+    ]).then(([traitsData, zombiesData]: [TraitsData, any[]]) => {
+      // Merge zombie type into traits data
+      const mergedTraits = { ...traitsData }
+      zombiesData.forEach((z) => {
+        if (z.revealed && mergedTraits[z.tokenId]) {
+          const entry = mergedTraits[z.tokenId]
+          const newAttributes = entry.attributes.map(attr => 
+            attr.trait_type === 'Type' ? { ...attr, value: 'Zombie' } : attr
+          )
+          mergedTraits[z.tokenId] = { ...entry, attributes: newAttributes }
+        }
+      })
+      setTraits(mergedTraits)
+    })
   }, [])
 
   // Pre-compute: for each category, the sorted list of unique values

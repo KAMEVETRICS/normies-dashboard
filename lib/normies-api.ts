@@ -97,3 +97,48 @@ export async function fetchLiveOpenSeaRarity(id: number) {
     return null
   }
 }
+
+export async function fetchZombieStatus() {
+  try {
+    const res = await fetch(`${BASE_URL}/zombies/status`, { next: { revalidate: 60 } })
+    if (!res.ok) return null
+    return await res.json()
+  } catch (error) {
+    console.error('Error fetching zombie status:', error)
+    return null
+  }
+}
+
+export async function fetchZombieConversions() {
+  try {
+    const res = await fetch(`${BASE_URL}/zombies/conversions?limit=100`, { next: { revalidate: 60 } })
+    if (!res.ok) return []
+    return await res.json()
+  } catch (error) {
+    console.error('Error fetching zombie conversions:', error)
+    return []
+  }
+}
+
+export async function fetchZombieToken(id: number) {
+  try {
+    const res = await fetch(`${BASE_URL}/zombies/token/${id}`, { next: { revalidate: 60 } })
+    if (!res.ok) return null
+    return await res.json()
+  } catch (error) {
+    console.error(`Error fetching zombie info for ${id}:`, error)
+    return null
+  }
+}
+
+export async function fetchHistoryStats() {
+  try {
+    const res = await fetch(`${BASE_URL}/history/stats`, { next: { revalidate: 60 } })
+    if (!res.ok) return null
+    return await res.json()
+  } catch (error) {
+    console.error('Error fetching history stats:', error)
+    return null
+  }
+}
+

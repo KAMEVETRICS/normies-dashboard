@@ -1,8 +1,8 @@
 import { getTraits, getRarityScores } from '@/lib/rarity'
-import { fetchNormieMetadata, fetchNormieVersions, fetchNormiePixels, fetchLiveOpenSeaRarity } from '@/lib/normies-api'
+import { fetchNormieMetadata, fetchNormieVersions, fetchNormiePixels, fetchLiveOpenSeaRarity, fetchZombieToken } from '@/lib/normies-api'
 import { NormieImageViewer } from '@/components/NormieImageViewer'
 import { getBurnedTokens } from '@/lib/data-loader'
-import { Flame } from 'lucide-react'
+import { Flame, Skull } from 'lucide-react'
 
 function computeTraitRarity(
   traitType: string,
@@ -57,8 +57,16 @@ export default async function NormieProfilePage({ params }: { params: Promise<{ 
   const metadata = await fetchNormieMetadata(tokenId)
   const versions = await fetchNormieVersions(tokenId)
   const pixels = await fetchNormiePixels(tokenId)
+  const zombieData = await fetchZombieToken(tokenId)
+  const isZombie = zombieData?.info?.isZombie === true
+
   const burnedTokens = getBurnedTokens()
   const isBurned = burnedTokens.some((b: { tokenId: string | number }) => Number(b.tokenId) === tokenId)
+
+  // Use metadata attributes for zombies to show zombie traits, filtering out stats
+  const displayAttributes = isZombie && metadata?.attributes
+    ? metadata.attributes.filter((a: { trait_type: string }) => !['Level', 'Action Points', 'Pixel Count', 'Customized'].includes(a.trait_type))
+    : attributes
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 max-w-4xl mx-auto">
@@ -67,6 +75,11 @@ export default async function NormieProfilePage({ params }: { params: Promise<{ 
         {isBurned && (
           <div className="flex items-center gap-2 px-3 py-1 bg-red-500/20 text-red-500 rounded-md border border-red-500/30 text-sm font-bold tracking-widest uppercase">
             <Flame className="w-4 h-4" /> Burned
+          </div>
+        )}
+        {isZombie && (
+          <div className="flex items-center gap-2 px-3 py-1 bg-green-500/20 text-green-500 rounded-md border border-green-500/30 text-sm font-bold tracking-widest uppercase">
+            <Skull className="w-4 h-4" /> Zombie
           </div>
         )}
       </div>
@@ -108,9 +121,9 @@ export default async function NormieProfilePage({ params }: { params: Promise<{ 
 
           <div className="bg-[#111111] border border-[#48494b]/40 rounded-xl p-6">
              <h3 className="text-sm font-medium text-[#e3e5e4]/70 uppercase mb-4 tracking-wider border-b border-[#48494b]/20 pb-2">Traits</h3>
-             {attributes.length > 0 ? (
+             {displayAttributes.length > 0 ? (
                <div className="grid grid-cols-2 gap-3">
-                 {attributes.map((attr) => {
+                 {displayAttributes.map((attr: { trait_type: string; value: string }) => {
                    const pct = computeTraitRarity(attr.trait_type, attr.value, traitsData)
                    return (
                      <div key={attr.trait_type} className="bg-[#1a1a1a] border border-[#48494b]/20 rounded-md p-3">

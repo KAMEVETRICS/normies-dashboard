@@ -19,6 +19,7 @@ export function Nav() {
             <Link href="/traits" className="hover:text-white transition-colors">Traits</Link>
             <Link href="/burns" className="hover:text-white transition-colors">Burns</Link>
             <Link href="/canvas" className="hover:text-white transition-colors">Canvas</Link>
+            <Link href="/zombies" className="hover:text-white transition-colors">Zombies</Link>
             <Link href="/sales" className="hover:text-white transition-colors">Sales</Link>
           </div>
         </div>
@@ -43,6 +44,7 @@ export function Nav() {
             <Link href="/traits" onClick={() => setMenuOpen(false)} className="hover:text-white transition-colors py-2">Traits</Link>
             <Link href="/burns" onClick={() => setMenuOpen(false)} className="hover:text-white transition-colors py-2">Burns</Link>
             <Link href="/canvas" onClick={() => setMenuOpen(false)} className="hover:text-white transition-colors py-2">Canvas</Link>
+            <Link href="/zombies" onClick={() => setMenuOpen(false)} className="hover:text-white transition-colors py-2">Zombies</Link>
             <Link href="/sales" onClick={() => setMenuOpen(false)} className="hover:text-white transition-colors py-2">Sales</Link>
           </div>
           <div className="pt-2 border-t border-[#48494b]/20">
