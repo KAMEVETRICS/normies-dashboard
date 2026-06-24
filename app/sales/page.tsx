@@ -28,6 +28,8 @@ export default async function SalesPage() {
     holdersMap.set(dString, h.unique_holders)
   }
 
+  let lastValidFloor = 0
+
   const marketCapData = daily.slice().reverse().map((day: DailySale) => {
     const dateObj = new Date(day.sale_date)
     const nextDateObj = new Date(dateObj)
@@ -48,7 +50,16 @@ export default async function SalesPage() {
     }
     
     const supply = 10000 - burnsUpToDate
-    const marketCap = day.floor_usd * supply
+    
+    // Forward-fill floor price for days with 0 sales
+    let currentFloor = Number(day.floor_usd) || 0
+    if (currentFloor > 0) {
+      lastValidFloor = currentFloor
+    } else {
+      currentFloor = lastValidFloor
+    }
+    
+    const marketCap = currentFloor * supply
     
     const dString = dateObj.toISOString().split('T')[0]
     const uniqueHolders = holdersMap.get(dString) || null
@@ -56,7 +67,7 @@ export default async function SalesPage() {
     return {
       date: day.sale_date,
       marketCap,
-      floorPrice: day.floor_usd,
+      floorPrice: currentFloor,
       supply,
       burns: dailyBurns,
       uniqueHolders
