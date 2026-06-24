@@ -28,17 +28,22 @@ export default async function SalesPage() {
     holdersMap.set(dString, h.unique_holders)
   }
 
-  // Forward-fill floor_usd and avg_usd for charts to prevent drops to zero
-  // daily is sorted newest to oldest. We iterate oldest to newest to forward-fill
+  // Forward-fill floor_usd and avg_usd to fix outlier/dust-bid days.
+  // Dune sometimes reports floor prices of $0.0001 from wash trades on days
+  // with real avg prices of $800+. Detect these by comparing floor to avg.
   let lastFloor = 0
   let lastAvg = 0
   const processedDaily = daily.slice().reverse().map(d => {
     const floor = Number(d.floor_usd) || 0
     const avg = Number(d.avg_usd) || 0
     
-    if (floor > 0) lastFloor = floor
-    const finalFloor = floor > 0 ? floor : lastFloor
+    // Floor is an outlier if it's less than 10% of the day's average price
+    const floorIsOutlier = avg > 0 && floor < avg * 0.1
+    const validFloor = floor > 0 && !floorIsOutlier
     
+    if (validFloor) lastFloor = floor
+    const finalFloor = validFloor ? floor : lastFloor
+
     if (avg > 0) lastAvg = avg
     const finalAvg = avg > 0 ? avg : lastAvg
     
