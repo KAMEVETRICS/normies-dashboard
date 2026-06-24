@@ -142,3 +142,23 @@ export async function fetchHistoryStats() {
   }
 }
 
+export async function fetchOpenSeaStats() {
+  try {
+    const apiKey = process.env.OPENSEA_API_KEY
+    if (!apiKey) return null
+    const res = await fetch('https://api.opensea.io/api/v2/collections/normies/stats', {
+      headers: {
+        'x-api-key': apiKey,
+        'accept': 'application/json'
+      },
+      next: { revalidate: 60 }
+    })
+    if (!res.ok) return null
+    return await res.json()
+  } catch (error) {
+    console.error('Error fetching OpenSea stats:', error)
+    return null
+  }
+}
+
+

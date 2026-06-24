@@ -116,6 +116,12 @@ export type MarketplaceStat = {
   floor_usd: number
 }
 
+export type DailyHolder = {
+  date: string
+  unique_holders: number
+}
+
+
 /**
  * Cached Dune query fetchers.
  * unstable_cache ensures the expensive execute+poll cycle only runs
@@ -139,3 +145,10 @@ export const getMarketplaceStats = unstable_cache(
   ['dune-marketplace-stats'],
   { revalidate: 3600 }
 )
+
+export const getDailyHolders = unstable_cache(
+  () => duneExecuteAndPoll<DailyHolder>(process.env.DUNE_QUERY_DAILY_HOLDERS || '7801493'),
+  ['dune-daily-holders'],
+  { revalidate: 3600 }
+)
+

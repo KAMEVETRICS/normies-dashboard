@@ -1,33 +1,96 @@
-import { getDailySales, getRecentSales, getMarketplaceStats } from '@/lib/dune-client'
+import { getDailySales, getRecentSales, getMarketplaceStats, getDailyHolders, DailySale, RecentSale, MarketplaceStat } from '@/lib/dune-client'
 import { SalesPriceChart } from '@/components/SalesPriceChart'
 import { SalesVolumeChart } from '@/components/SalesVolumeChart'
+import { MarketCapChart } from '@/components/MarketCapChart'
+import { fetchOpenSeaStats } from '@/lib/normies-api'
+import { getBurns, getBurnedTokens } from '@/lib/data-loader'
 
 export const revalidate = 3600 // Revalidate hourly from Dune
 
 export default async function SalesPage() {
-  const [daily, recent, marketplaces] = await Promise.all([
+  const [daily, recent, marketplaces, osStats, holdersData] = await Promise.all([
     getDailySales(),
     getRecentSales(),
     getMarketplaceStats(),
-  ])
+    fetchOpenSeaStats(),
+    getDailyHolders()
+  ]) as [DailySale[], RecentSale[], MarketplaceStat[], any, any]
 
-  const totalVolume = marketplaces.reduce((sum, m) => sum + m.total_volume_usd, 0)
+  const totalVolume = marketplaces.reduce((sum: number, m: MarketplaceStat) => sum + m.total_volume_usd, 0)
+  
+  const burns = getBurns()
+  const totalBurned = getBurnedTokens().length
+
+  // Create a map for fast lookup of daily holders by date string (e.g. "2024-05-12")
+  const holdersMap = new Map<string, number>()
+  for (const h of holdersData) {
+    const dString = new Date(h.date).toISOString().split('T')[0]
+    holdersMap.set(dString, h.unique_holders)
+  }
+
+  const marketCapData = daily.slice().reverse().map((day: DailySale) => {
+    const dateObj = new Date(day.sale_date)
+    const nextDateObj = new Date(dateObj)
+    nextDateObj.setDate(nextDateObj.getDate() + 1)
+    
+    const timestampLimit = nextDateObj.getTime() / 1000
+    let burnsUpToDate = 0
+    let dailyBurns = 0
+    
+    for (const b of burns) {
+      const ts = Number(b.timestamp)
+      if (ts < timestampLimit) {
+        burnsUpToDate += Number(b.tokenCount)
+        if (ts >= dateObj.getTime() / 1000) {
+          dailyBurns += Number(b.tokenCount)
+        }
+      }
+    }
+    
+    const supply = 10000 - burnsUpToDate
+    const marketCap = day.floor_usd * supply
+    
+    const dString = dateObj.toISOString().split('T')[0]
+    const uniqueHolders = holdersMap.get(dString) || null
+    
+    return {
+      date: day.sale_date,
+      marketCap,
+      floorPrice: day.floor_usd,
+      supply,
+      burns: dailyBurns,
+      uniqueHolders
+    }
+  })
+
+  // current market cap from open sea stats if available, otherwise fallback
+  const currentFloor = daily[0]?.floor_usd || 0
+  const osMarketCap = osStats?.total?.market_cap ? Math.round(osStats.total.market_cap) : (currentFloor * (10000 - totalBurned))
+  const uniqueHolders = osStats?.total?.num_owners || (holdersData.length > 0 ? holdersData[0].unique_holders : 'N/A')
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <h1 className="text-3xl font-bold tracking-widest text-white">SALES DASHBOARD</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div className="bg-[#111111] border border-[#48494b]/40 rounded-xl p-5 flex flex-col gap-2">
-          <div className="text-sm text-[#e3e5e4]/70">Total Volume (USD)</div>
+          <div className="text-sm text-[#e3e5e4]/70">Market Cap (USD)</div>
+          <div className="text-3xl font-bold text-white">${osMarketCap.toLocaleString()}</div>
+        </div>
+        <div className="bg-[#111111] border border-[#48494b]/40 rounded-xl p-5 flex flex-col gap-2">
+          <div className="text-sm text-[#e3e5e4]/70">Total Volume</div>
           <div className="text-3xl font-bold text-white">${Math.round(totalVolume).toLocaleString()}</div>
+        </div>
+        <div className="bg-[#111111] border border-[#48494b]/40 rounded-xl p-5 flex flex-col gap-2">
+          <div className="text-sm text-[#e3e5e4]/70">Unique Holders</div>
+          <div className="text-3xl font-bold text-white">{uniqueHolders}</div>
         </div>
         <div className="bg-[#111111] border border-[#48494b]/40 rounded-xl p-5 flex flex-col gap-2">
           <div className="text-sm text-[#e3e5e4]/70">Last 24h Sales</div>
           <div className="text-3xl font-bold text-white">{daily[0]?.num_sales || 0}</div>
         </div>
         <div className="bg-[#111111] border border-[#48494b]/40 rounded-xl p-5 flex flex-col gap-2">
-          <div className="text-sm text-[#e3e5e4]/70">Active Marketplaces</div>
+          <div className="text-sm text-[#e3e5e4]/70">Active Markets</div>
           <div className="text-3xl font-bold text-white">{marketplaces.length}</div>
         </div>
       </div>
@@ -40,6 +103,8 @@ export default async function SalesPage() {
           <SalesVolumeChart data={daily} />
         </div>
       </div>
+
+      <MarketCapChart data={marketCapData} />
 
       <div className="bg-[#111111] border border-[#48494b]/40 rounded-xl overflow-hidden">
         <div className="p-4 border-b border-[#48494b]/40">
@@ -56,7 +121,7 @@ export default async function SalesPage() {
               </tr>
             </thead>
             <tbody>
-              {recent.slice(0, 20).map((sale, i) => (
+              {recent.slice(0, 20).map((sale: RecentSale, i: number) => (
                 <tr key={i} className="border-b border-[#48494b]/20 hover:bg-[#1a1a1a]/50 transition-colors">
                   <td className="px-6 py-4 font-medium text-white">
                     <a href={`/normie/${sale.token_id}`} className="hover:underline decoration-[#48494b]">
