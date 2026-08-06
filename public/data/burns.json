@@ -1,5 +1,22 @@
 [
   {
+    "commitId": "939",
+    "owner": "0x6d915f25eb79363bc4cfbdafc6440a87688b460c",
+    "receiverTokenId": "8528",
+    "tokenCount": 1,
+    "transferredActionPoints": "0",
+    "pixelCounts": "[627]",
+    "blockNumber": "25695980",
+    "timestamp": "1786020155",
+    "txHash": "0x403b1d915023e377c0cdf54e58b787befb88f5cbb57a00151ecde57b36b62a02",
+    "revealed": false,
+    "totalActions": null,
+    "expired": null,
+    "revealBlockNumber": null,
+    "revealTimestamp": null,
+    "revealTxHash": null
+  },
+  {
     "commitId": "938",
     "owner": "0x06f844e25622ee91589eea5fb6bf83a4071a33a1",
     "receiverTokenId": "9330",
@@ -1122,23 +1139,6 @@
     "revealTxHash": "0x0e11e8e3beff5cecd84cdf7415555349ff6217453841e79b283b823209051af2"
   },
   {
-    "commitId": "871",
-    "owner": "0x77ffea617cb5e85f30eaca48d420df7e48b3c633",
-    "receiverTokenId": "1201",
-    "tokenCount": 1,
-    "transferredActionPoints": "0",
-    "pixelCounts": "[546]",
-    "blockNumber": "25367713",
-    "timestamp": "1782065939",
-    "txHash": "0x1ba76a0dfd40e2990bf6e0d72194426b9b8d1347c9d0f46a498ccbb381731f51",
-    "revealed": true,
-    "totalActions": "16",
-    "expired": false,
-    "revealBlockNumber": "25367726",
-    "revealTimestamp": "1782066095",
-    "revealTxHash": "0xdcfb59d7981f3022c802bfe23a931b5ef8049eee0b6de2e808b905f61519e9c5"
-  },
-  {
     "commitId": "872",
     "owner": "0x020edf7b630025d8113a46cac63c41c095fc98f0",
     "receiverTokenId": "6179",
@@ -1154,6 +1154,23 @@
     "revealBlockNumber": "25367721",
     "revealTimestamp": "1782066035",
     "revealTxHash": "0x17611a25cbc5a6e8526c1cc293748ac86fd5b48e94fb1bbf35f5d7d39582f8b1"
+  },
+  {
+    "commitId": "871",
+    "owner": "0x77ffea617cb5e85f30eaca48d420df7e48b3c633",
+    "receiverTokenId": "1201",
+    "tokenCount": 1,
+    "transferredActionPoints": "0",
+    "pixelCounts": "[546]",
+    "blockNumber": "25367713",
+    "timestamp": "1782065939",
+    "txHash": "0x1ba76a0dfd40e2990bf6e0d72194426b9b8d1347c9d0f46a498ccbb381731f51",
+    "revealed": true,
+    "totalActions": "16",
+    "expired": false,
+    "revealBlockNumber": "25367726",
+    "revealTimestamp": "1782066095",
+    "revealTxHash": "0xdcfb59d7981f3022c802bfe23a931b5ef8049eee0b6de2e808b905f61519e9c5"
   },
   {
     "commitId": "870",
