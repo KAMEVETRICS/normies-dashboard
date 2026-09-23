@@ -9,12 +9,12 @@
     "blockNumber": "26042120",
     "timestamp": "1790190011",
     "txHash": "0x153baafc966e49863d1e645637fc09284e00822561f4862db6eb207475118d34",
-    "revealed": false,
-    "totalActions": null,
-    "expired": null,
-    "revealBlockNumber": null,
-    "revealTimestamp": null,
-    "revealTxHash": null
+    "revealed": true,
+    "totalActions": "115",
+    "expired": true,
+    "revealBlockNumber": "26042461",
+    "revealTimestamp": "1790194127",
+    "revealTxHash": "0x68c473469e99efeaeabfd2ae3ad38fe8999a3c11afaab06125f822f83336b5f3"
   },
   {
     "commitId": "973",
